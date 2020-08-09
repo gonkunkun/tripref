@@ -1,0 +1,37 @@
+version: "3.5"
+services:
+  builder:
+    container_name: frontend_builder
+    build:
+      context: .
+      dockerfile: ./etc/docker/frontend/Dockerfile
+      target: build-stage
+    volumes:
+      - ./frontend/src:/app/src:cached
+      - ./frontend/dist:/app/dist:z
+  frontend:
+    container_name: frontend
+    build:
+      context: .
+      dockerfile: ./etc/docker/frontend/Dockerfile
+      target: development-stage
+    volumes:
+      - ./frontend:/app
+    environment:
+      PORT: 3333
+      HOST: 0.0.0.0
+    ports:
+      - "3333:3333"
+  swagger:
+    container_name: swagger
+    image: swaggerapi/swagger-ui
+    volumes:
+      - ./docs/api/swagger.yaml:/usr/share/nginx/html/swagger.yaml
+    environment:
+      API_URL: swagger.yaml
+    ports:
+      - "3039:8080"
+
+volumes:
+  bundle:
+    driver: local
